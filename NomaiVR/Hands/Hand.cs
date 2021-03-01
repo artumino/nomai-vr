@@ -121,7 +121,7 @@ namespace NomaiVR
             skeletonDriver.rangeOfMotion = _rangeOfMotion;
             skeletonDriver.skeletonRoot = prefabTransform.Find("Armature/Root");
             skeletonDriver.updatePose = false;
-            skeletonDriver.onlySetRotations = true;
+            //skeletonDriver.onlySetRotations = true;
             skeletonDriver.skeletonBlend = 1f;
             skeletonDriver.fallbackPoser = prefabObject.AddComponent<SteamVR_Skeleton_Poser>();
 
