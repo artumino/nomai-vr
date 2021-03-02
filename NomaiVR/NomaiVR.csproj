@@ -133,6 +133,7 @@
     <Compile Include="Logs.cs" />
     <Compile Include="ModConfig\ModSettings.cs" />
     <Compile Include="ReusableBehaviours\DebugFollowTarget.cs" />
+    <Compile Include="ReusableBehaviours\DebugLogCameras.cs" />
     <Compile Include="ReusableBehaviours\ShipMonitorInteraction.cs" />
     <Compile Include="Saves\ModSaveFile.cs" />
     <Compile Include="Hands\Hand.cs" />
