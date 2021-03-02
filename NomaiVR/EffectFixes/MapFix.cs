@@ -53,6 +53,10 @@ namespace NomaiVR
                 newCamera.gameObject.SetActive(true);
                 _mapController.SetValue("_mapCamera", owCamera);
 
+                // Start camera as disabled, this avoid unecessary rendering
+                // until the player open and closes the map
+                owCamera.SetEnabled(false);
+
                 var markerManager = mapCameraTransform.Find("MarkerManager").GetComponent<Canvas>();
                 var lockOnCanvas = mapCameraTransform.Find("MapLockOnCanvas").GetComponent<Canvas>();
 
