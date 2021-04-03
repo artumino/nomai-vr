@@ -1,8 +1,11 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Collections;
+using System;
+using Valve.VR;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Valve.VR
 {
@@ -22,25 +25,32 @@ namespace Valve.VR
         public delegate void DeviceConnectedChangeHandler(SteamVR_Action_Pose fromAction, SteamVR_Input_Sources fromSource, bool deviceConnected);
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the active state (ActionSet active and binding active) changes</summary>
-        public event ActiveChangeHandler onActiveChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
+        public event ActiveChangeHandler onActiveChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the active state of the binding changes</summary>
-        public event ActiveChangeHandler onActiveBindingChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
+        public event ActiveChangeHandler onActiveBindingChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the orientation of the pose changes more than the changeTolerance</summary>
-        public event ChangeHandler onChange { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
+        public event ChangeHandler onChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the action is updated</summary>
-        public event UpdateHandler onUpdate { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
+        public event UpdateHandler onUpdate
+        { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the state of the tracking has changed</summary>
-        public event TrackingChangeHandler onTrackingChanged { add { sourceMap[SteamVR_Input_Sources.Any].onTrackingChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onTrackingChanged -= value; } }
+        public event TrackingChangeHandler onTrackingChanged
+        { add { sourceMap[SteamVR_Input_Sources.Any].onTrackingChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onTrackingChanged -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the validity of the pose has changed</summary>
-        public event ValidPoseChangeHandler onValidPoseChanged { add { sourceMap[SteamVR_Input_Sources.Any].onValidPoseChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onValidPoseChanged -= value; } }
+        public event ValidPoseChangeHandler onValidPoseChanged
+        { add { sourceMap[SteamVR_Input_Sources.Any].onValidPoseChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onValidPoseChanged -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the device bound to this pose is connected or disconnected</summary>
-        public event DeviceConnectedChangeHandler onDeviceConnectedChanged { add { sourceMap[SteamVR_Input_Sources.Any].onDeviceConnectedChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onDeviceConnectedChanged -= value; } }
+        public event DeviceConnectedChangeHandler onDeviceConnectedChanged
+        { add { sourceMap[SteamVR_Input_Sources.Any].onDeviceConnectedChanged += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onDeviceConnectedChanged -= value; } }
 
         /// <summary>Fires an event when a device is connected or disconnected.</summary>
         /// <param name="inputSource">The device you would like to add an event to. Any if the action is not device specific.</param>
@@ -138,6 +148,14 @@ namespace Valve.VR
         public void RemoveOnUpdateListener(SteamVR_Input_Sources inputSource, UpdateHandler functionToStopCalling)
         {
             sourceMap[inputSource].onUpdate -= functionToStopCalling;
+        }
+
+        /// <summary>
+        /// Removes all listeners, useful for dispose pattern
+        /// </summary>
+        public void RemoveAllListeners(SteamVR_Input_Sources input_Sources)
+        {
+            sourceMap[input_Sources].RemoveAllListeners();
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize() { }
@@ -434,8 +452,10 @@ namespace Valve.VR
         public override bool lastChanged { get; protected set; }
 
         /// <summary>The handle to the origin of the component that was used to update this pose</summary>
-        public override ulong activeOrigin {
-            get {
+        public override ulong activeOrigin
+        {
+            get
+            {
                 if (active)
                     return poseActionData.activeOrigin;
 
@@ -531,6 +551,63 @@ namespace Valve.VR
 
             if (poseActionData_size == 0)
                 poseActionData_size = (uint)Marshal.SizeOf(typeof(InputPoseActionData_t));
+        }
+
+        /// <summary>
+        /// Removes all listeners, useful for dispose pattern
+        /// </summary>
+        public virtual void RemoveAllListeners()
+        {
+
+            Delegate[] delegates;
+
+            if (onActiveChange != null)
+            {
+                delegates = onActiveChange.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onActiveChange -= (SteamVR_Action_Pose.ActiveChangeHandler)existingDelegate;
+            }
+
+            if (onChange != null)
+            {
+                delegates = onChange.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onChange -= (SteamVR_Action_Pose.ChangeHandler)existingDelegate;
+            }
+
+            if (onUpdate != null)
+            {
+                delegates = onUpdate.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onUpdate -= (SteamVR_Action_Pose.UpdateHandler)existingDelegate;
+            }
+
+            if (onTrackingChanged != null)
+            {
+                delegates = onTrackingChanged.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onTrackingChanged -= (SteamVR_Action_Pose.TrackingChangeHandler)existingDelegate;
+            }
+
+            if (onValidPoseChanged != null)
+            {
+                delegates = onValidPoseChanged.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onValidPoseChanged -= (SteamVR_Action_Pose.ValidPoseChangeHandler)existingDelegate;
+            }
+
+            if (onDeviceConnectedChanged != null)
+            {
+                delegates = onDeviceConnectedChanged.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onDeviceConnectedChanged -= (SteamVR_Action_Pose.DeviceConnectedChangeHandler)existingDelegate;
+            }
         }
 
         /// <summary><strong>[Should not be called by user code]</strong>

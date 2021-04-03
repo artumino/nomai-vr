@@ -1,10 +1,12 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+using System.Linq;
 using Valve.Newtonsoft.Json;
+using System.IO;
 
 namespace Valve.VR
 {
@@ -288,15 +290,19 @@ namespace Valve.VR
         public string usage;
 
         [JsonIgnore]
-        public string codeFriendlyName {
-            get {
+        public string codeFriendlyName
+        {
+            get
+            {
                 return SteamVR_Input_ActionFile.GetCodeFriendlyName(name);
             }
         }
 
         [JsonIgnore]
-        public string shortName {
-            get {
+        public string shortName
+        {
+            get
+            {
                 int lastIndex = name.LastIndexOf('/');
                 if (lastIndex == name.Length - 1)
                     return string.Empty;
@@ -379,8 +385,10 @@ namespace Valve.VR
         [JsonIgnore]
         private static string[] _requirementValues;
         [JsonIgnore]
-        public static string[] requirementValues {
-            get {
+        public static string[] requirementValues
+        {
+            get
+            {
                 if (_requirementValues == null)
                     _requirementValues = System.Enum.GetNames(typeof(SteamVR_Input_ActionFile_Action_Requirements));
 
@@ -406,8 +414,10 @@ namespace Valve.VR
         }
 
         [JsonIgnore]
-        public SteamVR_Input_ActionFile_Action_Requirements requirementEnum {
-            get {
+        public SteamVR_Input_ActionFile_Action_Requirements requirementEnum
+        {
+            get
+            {
                 for (int index = 0; index < requirementValues.Length; index++)
                 {
                     if (string.Equals(requirementValues[index], requirement, System.StringComparison.CurrentCultureIgnoreCase))
@@ -418,28 +428,35 @@ namespace Valve.VR
 
                 return SteamVR_Input_ActionFile_Action_Requirements.suggested;
             }
-            set {
+            set
+            {
                 requirement = value.ToString();
             }
         }
 
         [JsonIgnore]
-        public string codeFriendlyName {
-            get {
+        public string codeFriendlyName
+        {
+            get
+            {
                 return SteamVR_Input_ActionFile.GetCodeFriendlyName(name);
             }
         }
 
         [JsonIgnore]
-        public string shortName {
-            get {
+        public string shortName
+        {
+            get
+            {
                 return SteamVR_Input_ActionFile.GetShortName(name);
             }
         }
 
         [JsonIgnore]
-        public string path {
-            get {
+        public string path
+        {
+            get
+            {
                 int lastIndex = name.LastIndexOf('/');
                 if (lastIndex != -1 && lastIndex + 1 < name.Length)
                 {
@@ -466,8 +483,10 @@ namespace Valve.VR
         }
 
         [JsonIgnore]
-        public SteamVR_ActionDirections direction {
-            get {
+        public SteamVR_ActionDirections direction
+        {
+            get
+            {
                 if (type.ToLower() == SteamVR_Input_ActionFile_ActionTypes.vibration)
                     return SteamVR_ActionDirections.Out;
 
@@ -478,8 +497,10 @@ namespace Valve.VR
         protected const string prefix = "/actions/";
 
         [JsonIgnore]
-        public string actionSet {
-            get {
+        public string actionSet
+        {
+            get
+            {
                 int setEnd = name.IndexOf('/', prefix.Length);
                 if (setEnd == -1)
                     return string.Empty;
@@ -577,7 +598,7 @@ namespace Valve.VR
         public string[] references = new string[] { "SteamVR" };
         public string[] optionalUnityReferences = new string[0];
         public string[] includePlatforms = new string[0];
-        public string[] excludePlatforms = new string[0];
+        public string[] excludePlatforms = new string[] { "Android" };
         public bool allowUnsafeCode = false;
         public bool overrideReferences = false;
         public string[] precompiledReferences = new string[0];

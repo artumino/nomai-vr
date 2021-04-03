@@ -1,12 +1,14 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
+using UnityEngine;
+using Valve.VR;
+using System.IO;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
+using System.Linq;
 using Valve.Newtonsoft.Json;
+using System.Text;
 
 namespace Valve.VR
 {
@@ -44,8 +46,10 @@ namespace Valve.VR
         protected static bool initializing = false;
 
         protected static int startupFrame = 0;
-        public static bool isStartupFrame {
-            get {
+        public static bool isStartupFrame
+        {
+            get
+            {
                 return Time.frameCount >= (startupFrame - 1) && Time.frameCount <= (startupFrame + 1);
             }
         }
@@ -1519,6 +1523,11 @@ namespace Valve.VR
             return SteamVR_Utils.SanitizePath(path);
         }
 
+        public static string GetActionsFileName()
+        {
+            return SteamVR_Settings.instance.actionsFilePath;
+        }
+
 
         /// <summary>
         /// Deletes the action manifest file and all the default bindings it had listed in the default bindings section
@@ -1618,7 +1627,7 @@ namespace Valve.VR
                 {
                     openingSetup = true;
                     UnityEditor.EditorApplication.isPlaying = false;
-                    Type editorWindowType = FindType("Valve.VR.SteamVR_Input_EditorWindow");
+                    Type editorWindowType = SteamVR_Utils.FindType("Valve.VR.SteamVR_Input_EditorWindow");
                     if (editorWindowType != null)
                     {
                         var window = UnityEditor.EditorWindow.GetWindow(editorWindowType, false, "SteamVR Input", true);
@@ -1634,17 +1643,9 @@ namespace Valve.VR
             }
         }
 
-        private static Type FindType(string typeName)
+        public static string GetEditorAppKey()
         {
-            var type = Type.GetType(typeName);
-            if (type != null) return type;
-            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                type = a.GetType(typeName);
-                if (type != null)
-                    return type;
-            }
-            return null;
+            return SteamVR_Settings.instance.editorAppKey;
         }
 #endif
     }

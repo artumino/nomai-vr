@@ -1,8 +1,11 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Collections;
+using System;
+using Valve.VR;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Valve.VR
 {
@@ -20,25 +23,32 @@ namespace Valve.VR
         public delegate void UpdateHandler(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool newState);
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever a state changes from false to true or true to false</summary>
-        public event ChangeHandler onChange { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
+        public event ChangeHandler onChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the action is updated</summary>
-        public event UpdateHandler onUpdate { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
+        public event UpdateHandler onUpdate
+        { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the boolean action is true and gets updated</summary>
-        public event StateHandler onState { add { sourceMap[SteamVR_Input_Sources.Any].onState += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onState -= value; } }
+        public event StateHandler onState
+        { add { sourceMap[SteamVR_Input_Sources.Any].onState += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onState -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the state of the boolean action has changed from false to true in the most recent update</summary>
-        public event StateDownHandler onStateDown { add { sourceMap[SteamVR_Input_Sources.Any].onStateDown += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onStateDown -= value; } }
+        public event StateDownHandler onStateDown
+        { add { sourceMap[SteamVR_Input_Sources.Any].onStateDown += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onStateDown -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the state of the boolean action has changed from true to false in the most recent update</summary>
-        public event StateUpHandler onStateUp { add { sourceMap[SteamVR_Input_Sources.Any].onStateUp += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onStateUp -= value; } }
+        public event StateUpHandler onStateUp
+        { add { sourceMap[SteamVR_Input_Sources.Any].onStateUp += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onStateUp -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the active state (ActionSet active and binding active) changes</summary>
-        public event ActiveChangeHandler onActiveChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
+        public event ActiveChangeHandler onActiveChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the bound state of the binding changes</summary>
-        public event ActiveChangeHandler onActiveBindingChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
+        public event ActiveChangeHandler onActiveBindingChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
 
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> True when the boolean action is true</summary>
@@ -203,6 +213,14 @@ namespace Valve.VR
             sourceMap[inputSource].onStateUp -= functionToStopCalling;
         }
 
+        /// <summary>
+        /// Remove all listeners registered in the source, useful for Dispose pattern
+        /// </summary>
+        public void RemoveAllListeners(SteamVR_Input_Sources input_Sources)
+        {
+            sourceMap[input_Sources].RemoveAllListeners();
+        }
+
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
         }
@@ -275,8 +293,10 @@ namespace Valve.VR
         public override bool lastChanged { get { return lastActionData.bChanged; } protected set { } }
 
         /// <summary>The handle to the origin of the component that was used to update the value for this action</summary>
-        public override ulong activeOrigin {
-            get {
+        public override ulong activeOrigin
+        {
+            get
+            {
                 if (active)
                     return actionData.activeOrigin;
 
@@ -326,6 +346,38 @@ namespace Valve.VR
             if (actionData_size == 0)
                 actionData_size = (uint)Marshal.SizeOf(typeof(InputDigitalActionData_t));
 
+        }
+
+        /// <summary>
+        /// Remove all listeners, useful for Dispose pattern
+        /// </summary>
+        public void RemoveAllListeners()
+        {
+            Delegate[] delegates;
+
+            if (onStateDown != null)
+            {
+                delegates = onStateDown.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onStateDown -= (SteamVR_Action_Boolean.StateDownHandler)existingDelegate;
+            }
+
+            if (onStateUp != null)
+            {
+                delegates = onStateUp.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onStateUp -= (SteamVR_Action_Boolean.StateUpHandler)existingDelegate;
+            }
+
+            if (onState != null)
+            {
+                delegates = onState.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onState -= (SteamVR_Action_Boolean.StateHandler)existingDelegate;
+            }
         }
 
         /// <summary><strong>[Should not be called by user code]</strong>

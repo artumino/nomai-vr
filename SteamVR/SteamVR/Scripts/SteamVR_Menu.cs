@@ -5,6 +5,7 @@
 //=============================================================================
 
 using UnityEngine;
+using Valve.VR;
 
 namespace Valve.VR
 {
@@ -166,11 +167,12 @@ namespace Valve.VR
                 {
                     if (GUILayout.Button("Switch to Standing"))
                         SteamVR.settings.trackingSpace = ETrackingUniverseOrigin.TrackingUniverseStanding;
+
                     if (GUILayout.Button("Center View"))
                     {
-                        var system = OpenVR.System;
-                        if (system != null)
-                            system.ResetSeatedZeroPose();
+                        var chaperone = OpenVR.Chaperone;
+                        if (chaperone != null)
+                            chaperone.ResetZeroPose(SteamVR.settings.trackingSpace);
                     }
                 }
                 else
@@ -181,8 +183,8 @@ namespace Valve.VR
             }
 
 #if !UNITY_EDITOR
-            if (GUILayout.Button("Exit"))
-                Application.Quit();
+		if (GUILayout.Button("Exit"))
+			Application.Quit();
 #endif
             GUILayout.Space(menuOffset);
 

@@ -7,9 +7,10 @@
 using UnityEngine;
 using System.Collections;
 using System.Reflection;
+using Valve.VR;
 
-#if true
-using UnityEngine.XR;
+#if UNITY_2017_2_OR_NEWER
+    using UnityEngine.XR;
 #else
 using XRSettings = UnityEngine.VR.VRSettings;
 using XRDevice = UnityEngine.VR.VRDevice;
@@ -26,9 +27,7 @@ namespace Valve.VR
         public Transform offset { get { return _head; } } // legacy
         public Transform origin { get { return _head.parent; } }
 
-#pragma warning disable CS0109 // Member does not hide an inherited member; new keyword is not required
         public new Camera camera { get; private set; }
-#pragma warning restore CS0109 // Member does not hide an inherited member; new keyword is not required
 
         [SerializeField]
         private Transform _ears;
@@ -41,13 +40,15 @@ namespace Valve.VR
 
         public bool wireframe = false;
 
-#if true
-        static public float sceneResolutionScale {
-            get { return XRSettings.eyeTextureResolutionScale; }
-            set { XRSettings.eyeTextureResolutionScale = value; }
-        }
+#if UNITY_2017_2_OR_NEWER
+    static public float sceneResolutionScale
+    {
+        get { return XRSettings.eyeTextureResolutionScale; }
+        set { XRSettings.eyeTextureResolutionScale = value; }
+    }
 #else
-        static public float sceneResolutionScale {
+        static public float sceneResolutionScale
+        {
             get { return XRSettings.renderScale; }
             set { if (value == 0) return; XRSettings.renderScale = value; }
         }
@@ -213,9 +214,10 @@ namespace Valve.VR
 
                 while (transform.childCount > 0)
                     transform.GetChild(0).parent = head;
-#if false
+#if !UNITY_2017_2_OR_NEWER
                 var guiLayer = GetComponent<GUILayer>();
-                if (guiLayer != null) {
+                if (guiLayer != null)
+                {
                     DestroyImmediate(guiLayer);
                     head.gameObject.AddComponent<GUILayer>();
                 }
@@ -243,9 +245,10 @@ namespace Valve.VR
             // Move children and components from head back to camera.
             while (head.childCount > 0)
                 head.GetChild(0).parent = transform;
-#if false
+#if !UNITY_2017_2_OR_NEWER
             var guiLayer = head.GetComponent<GUILayer>();
-            if (guiLayer != null) {
+            if (guiLayer != null)
+            {
                 DestroyImmediate(guiLayer);
                 gameObject.AddComponent<GUILayer>();
             }

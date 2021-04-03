@@ -4,10 +4,11 @@
 //
 //=============================================================================
 
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEngine;
+using Valve.VR;
 
 namespace Valve.VR
 {
@@ -79,8 +80,10 @@ namespace Valve.VR
         {
             private bool needsShutdown, failedLoadInterface;
             private CVRRenderModels _instance;
-            public CVRRenderModels instance {
-                get {
+            public CVRRenderModels instance
+            {
+                get
+                {
                     if (_instance == null && !failedLoadInterface)
                     {
                         if (Application.isEditor && Application.isPlaying == false)
@@ -449,7 +452,12 @@ namespace Valve.VR
                         texture.Apply();
                     }
 
+#if UNITY_URP
+                    material = new Material(shader != null ? shader : Shader.Find("Universal Render Pipeline/Lit"));
+#else
                     material = new Material(shader != null ? shader : Shader.Find("Standard"));
+#endif
+
                     material.mainTexture = texture;
                     //material.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
@@ -470,7 +478,7 @@ namespace Valve.VR
                 renderModels.FreeRenderModel(pRenderModel);
             else
 #endif
-            StartCoroutine(FreeRenderModel(pRenderModel));
+                StartCoroutine(FreeRenderModel(pRenderModel));
 
             return new RenderModel(mesh, material);
         }

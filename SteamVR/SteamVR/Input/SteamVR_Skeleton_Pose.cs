@@ -1,8 +1,11 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
 using System;
-using System.Linq;
+using System.Collections;
 using UnityEngine;
+using Valve.VR;
+
+using System.Linq;
 
 namespace Valve.VR
 {
@@ -118,8 +121,10 @@ namespace Valve.VR
     public class SteamVR_Skeleton_FingerExtensionTypeLists
     {
         private SteamVR_Skeleton_FingerExtensionTypes[] _enumList;
-        public SteamVR_Skeleton_FingerExtensionTypes[] enumList {
-            get {
+        public SteamVR_Skeleton_FingerExtensionTypes[] enumList
+        {
+            get
+            {
                 if (_enumList == null)
                     _enumList = (SteamVR_Skeleton_FingerExtensionTypes[])System.Enum.GetValues(typeof(SteamVR_Skeleton_FingerExtensionTypes));
                 return _enumList;
@@ -127,8 +132,10 @@ namespace Valve.VR
         }
 
         private string[] _stringList;
-        public string[] stringList {
-            get {
+        public string[] stringList
+        {
+            get
+            {
                 if (_stringList == null)
                     _stringList = enumList.Select(element => element.ToString()).ToArray();
                 return _stringList;

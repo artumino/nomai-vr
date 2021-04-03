@@ -1,6 +1,9 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Serialization;
 
 namespace Valve.VR
@@ -8,8 +11,10 @@ namespace Valve.VR
     public class SteamVR_Settings : ScriptableObject
     {
         private static SteamVR_Settings _instance;
-        public static SteamVR_Settings instance {
-            get {
+        public static SteamVR_Settings instance
+        {
+            get
+            {
                 LoadInstance();
 
                 return _instance;
@@ -18,11 +23,14 @@ namespace Valve.VR
 
         public bool pauseGameWhenDashboardVisible = true;
         public bool lockPhysicsUpdateRateToRenderFrequency = true;
-        public ETrackingUniverseOrigin trackingSpace {
-            get {
+        public ETrackingUniverseOrigin trackingSpace
+        {
+            get
+            {
                 return trackingSpaceOrigin;
             }
-            set {
+            set
+            {
                 trackingSpaceOrigin = value;
                 if (SteamVR_Behaviour.isPlaying)
                     SteamVR_Action_Pose.SetTrackingUniverseOrigin(trackingSpaceOrigin);
@@ -111,6 +119,14 @@ namespace Valve.VR
             }
         }
 
+        public static void Save()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(instance);
+            UnityEditor.AssetDatabase.SaveAssets();
+#endif
+        }
+
         private const string defaultSettingsAssetName = "SteamVR_Settings";
 
         private static void SetDefaultsIfNeeded()
@@ -131,6 +147,15 @@ namespace Valve.VR
 
             if (_instance.previewHandRight == null)
                 _instance.previewHandRight = FindDefaultPreviewHand(previewRightDefaultAssetName);
+#endif
+
+#if OPENVR_XR_API
+            Unity.XR.OpenVR.OpenVRSettings settings = Unity.XR.OpenVR.OpenVRSettings.GetSettings();
+            settings.ActionManifestFileRelativeFilePath = SteamVR_Input.GetActionsFilePath();
+
+#if UNITY_EDITOR
+            settings.EditorAppKey = _instance.editorAppKey;
+#endif
 #endif
         }
 

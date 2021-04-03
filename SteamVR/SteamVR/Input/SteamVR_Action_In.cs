@@ -1,9 +1,11 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Collections;
+using System;
+using Valve.VR;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Valve.VR
 {
@@ -147,6 +149,16 @@ namespace Valve.VR
         {
             sourceMap.ForceAddSourceToUpdateList(inputSource);
         }
+
+        /// <summary>
+        /// Returns a string for the type of controller that was being used the last time the action was triggered. Common types: 
+        /// vive_controller, oculus_touch, knuckles, vive_cosmos_controller, logitech_stylus
+        /// </summary>
+        /// <param name="inputSource">The device you would like to get data from. Any if the action is not device specific.</param>
+        public string GetControllerType(SteamVR_Input_Sources inputSource)
+        {
+            return SteamVR.instance.GetStringProperty(ETrackedDeviceProperty.Prop_ControllerType_String, GetDeviceIndex(inputSource));
+        }
     }
 
     public class SteamVR_Action_In_Source_Map<SourceElement> : SteamVR_Action_Source_Map<SourceElement>
@@ -250,7 +262,7 @@ namespace Valve.VR
         public abstract bool lastChanged { get; protected set; }
 
         /// <summary>The input source that triggered the action to be updated</summary>
-        public SteamVR_Input_Sources activeDevice { get { UpdateOriginTrackedDeviceInfo(); return SteamVR_Input_Source.GetSource(inputOriginInfo.devicePath); } }
+        public SteamVR_Input_Sources activeDevice { get { UpdateOriginTrackedDeviceInfo();  return SteamVR_Input_Source.GetSource(inputOriginInfo.devicePath); } }
 
         /// <summary>The device index (used by Render Models) used by the device that triggered the action to be updated</summary>
         public uint trackedDeviceIndex { get { UpdateOriginTrackedDeviceInfo(); return inputOriginInfo.trackedDeviceIndex; } }

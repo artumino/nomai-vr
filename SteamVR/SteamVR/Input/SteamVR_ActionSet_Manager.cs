@@ -1,10 +1,12 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 using UnityEngine;
+using System.Collections;
+using System;
+using Valve.VR;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Valve.VR
 {
@@ -52,10 +54,13 @@ namespace Valve.VR
 
                 if (rawActiveActionSetArray != null && rawActiveActionSetArray.Length > 0)
                 {
-                    EVRInputError err = OpenVR.Input.UpdateActionState(rawActiveActionSetArray, activeActionSetSize);
-                    if (err != EVRInputError.None)
-                        Debug.LogError("<b>[SteamVR]</b> UpdateActionState error: " + err.ToString());
-                    //else Debug.Log("Action sets activated: " + activeActionSets.Length);
+                    if (OpenVR.Input != null)
+                    {
+                        EVRInputError err = OpenVR.Input.UpdateActionState(rawActiveActionSetArray, activeActionSetSize);
+                        if (err != EVRInputError.None)
+                            Debug.LogError("<b>[SteamVR]</b> UpdateActionState error: " + err.ToString());
+                        //else Debug.Log("Action sets activated: " + activeActionSets.Length);
+                    }
                 }
                 else
                 {

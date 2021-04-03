@@ -4,8 +4,9 @@
 //
 //=============================================================================
 
-using System.Collections;
 using UnityEngine;
+using System.Collections;
+using Valve.VR;
 
 
 namespace Valve.VR
@@ -105,9 +106,11 @@ namespace Valve.VR
         public TrackedDevicePose_t[] gamePoses = new TrackedDevicePose_t[0];
 
         static private bool _pauseRendering;
-        static public bool pauseRendering {
+        static public bool pauseRendering
+        {
             get { return _pauseRendering; }
-            set {
+            set
+            {
                 _pauseRendering = value;
 
                 var compositor = OpenVR.Compositor;
@@ -312,8 +315,8 @@ namespace Valve.VR
             if (SteamVR_Settings.instance.legacyMixedRealityCamera)
                 SteamVR_ExternalCamera_LegacyManager.SubscribeToNewPoses();
 
-#if true
-            Application.onBeforeRender += OnBeforeRender;
+#if UNITY_2017_1_OR_NEWER
+		    Application.onBeforeRender += OnBeforeRender;
 #else
             Camera.onPreCull += OnCameraPreCull;
 #endif
@@ -336,8 +339,8 @@ namespace Valve.VR
             SteamVR_Events.InputFocus.Remove(OnInputFocus);
             SteamVR_Events.System(EVREventType.VREvent_RequestScreenshot).Remove(OnRequestScreenshot);
 
-#if true
-            Application.onBeforeRender -= OnBeforeRender;
+#if UNITY_2017_1_OR_NEWER
+		    Application.onBeforeRender -= OnBeforeRender;
 #else
             Camera.onPreCull -= OnCameraPreCull;
 #endif
@@ -357,8 +360,8 @@ namespace Valve.VR
             }
         }
 
-#if true
-        void OnBeforeRender()
+#if UNITY_2017_1_OR_NEWER
+	    void OnBeforeRender()
         {
             if (SteamVR.active == false)
                 return;
@@ -369,11 +372,12 @@ namespace Valve.VR
             }
         }
 #else
-        void OnCameraPreCull (Camera cam) {
+        void OnCameraPreCull(Camera cam)
+        {
             if (SteamVR.active == false)
                 return;
 
-#if true
+#if UNITY_2017_1_OR_NEWER
 		if (cam.cameraType != CameraType.VR)
 			return;
 #else
@@ -384,10 +388,12 @@ namespace Valve.VR
             }
 #endif
             // Only update poses on the first camera per frame.
-            if (Time.frameCount != lastFrameCount) {
+            if (Time.frameCount != lastFrameCount)
+            {
                 lastFrameCount = Time.frameCount;
 
-                if (SteamVR.settings.IsPoseUpdateMode(SteamVR_UpdateModes.OnPreCull)) {
+                if (SteamVR.settings.IsPoseUpdateMode(SteamVR_UpdateModes.OnPreCull))
+                {
                     UpdatePoses();
                 }
             }
@@ -400,43 +406,43 @@ namespace Valve.VR
             if (SteamVR.active == false)
                 return;
 
-            UpdatePoses();
-
             // Dispatch any OpenVR events.
             var system = OpenVR.System;
-            if (system != null)
-            {
-                var vrEvent = new VREvent_t();
-                var size = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t));
-                for (int i = 0; i < 64; i++)
-                {
-                    if (!system.PollNextEvent(ref vrEvent, size))
-                        break;
+            if (system == null)
+                return;
 
-                    switch ((EVREventType)vrEvent.eventType)
-                    {
-                        case EVREventType.VREvent_InputFocusCaptured: // another app has taken focus (likely dashboard)
-                            if (vrEvent.data.process.oldPid == 0)
-                            {
-                                SteamVR_Events.InputFocus.Send(false);
-                            }
-                            break;
-                        case EVREventType.VREvent_InputFocusReleased: // that app has released input focus
-                            if (vrEvent.data.process.pid == 0)
-                            {
-                                SteamVR_Events.InputFocus.Send(true);
-                            }
-                            break;
-                        case EVREventType.VREvent_ShowRenderModels:
-                            SteamVR_Events.HideRenderModels.Send(false);
-                            break;
-                        case EVREventType.VREvent_HideRenderModels:
-                            SteamVR_Events.HideRenderModels.Send(true);
-                            break;
-                        default:
-                            SteamVR_Events.System((EVREventType)vrEvent.eventType).Send(vrEvent);
-                            break;
-                    }
+            UpdatePoses();
+
+            var vrEvent = new VREvent_t();
+            var size = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t));
+            for (int i = 0; i < 64; i++)
+            {
+                if (!system.PollNextEvent(ref vrEvent, size))
+                    break;
+
+                switch ((EVREventType)vrEvent.eventType)
+                {
+                    case EVREventType.VREvent_InputFocusCaptured: // another app has taken focus (likely dashboard)
+                        if (vrEvent.data.process.oldPid == 0)
+                        {
+                            SteamVR_Events.InputFocus.Send(false);
+                        }
+                        break;
+                    case EVREventType.VREvent_InputFocusReleased: // that app has released input focus
+                        if (vrEvent.data.process.pid == 0)
+                        {
+                            SteamVR_Events.InputFocus.Send(true);
+                        }
+                        break;
+                    case EVREventType.VREvent_ShowRenderModels:
+                        SteamVR_Events.HideRenderModels.Send(false);
+                        break;
+                    case EVREventType.VREvent_HideRenderModels:
+                        SteamVR_Events.HideRenderModels.Send(true);
+                        break;
+                    default:
+                        SteamVR_Events.System((EVREventType)vrEvent.eventType).Send(vrEvent);
+                        break;
                 }
             }
 
@@ -449,17 +455,13 @@ namespace Valve.VR
             if (SteamVR.settings.lockPhysicsUpdateRateToRenderFrequency && Time.timeScale > 0.0f)
             {
                 var vr = SteamVR.instance;
-                if (vr != null)
+                if (vr != null && Application.isPlaying)
                 {
                     //var timing = new Compositor_FrameTiming();
                     //timing.m_nSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(Compositor_FrameTiming));
                     //vr.compositor.GetFrameTiming(ref timing, 0);
 
-                    // ############ IMPORTANT FOR NOMAIVR !!!!!!!!!!!!!!!!! ###############
-                    // If you are from the future and are trying to update the SteamVR dependency,
-                    // You need to make sure it doesn't mess with the game's fixedDeltaTime!
-                    // This is because NomaiVR sets the physics step itself.
-                    //Time.fixedDeltaTime = Time.timeScale / vr.hmd_DisplayFrequency;
+                    Time.fixedDeltaTime = Time.timeScale / vr.hmd_DisplayFrequency;
                 }
             }
         }

@@ -1,8 +1,11 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
-using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Collections;
+using System;
+using Valve.VR;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Valve.VR
 {
@@ -18,19 +21,24 @@ namespace Valve.VR
         public delegate void UpdateHandler(SteamVR_Action_Vector3 fromAction, SteamVR_Input_Sources fromSource, Vector3 axis, Vector3 delta);
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the axis changes by more than the specified changeTolerance</summary>
-        public event ChangeHandler onChange { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
+        public event ChangeHandler onChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event fires whenever the action is updated</summary>
-        public event UpdateHandler onUpdate { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
+        public event UpdateHandler onUpdate
+        { add { sourceMap[SteamVR_Input_Sources.Any].onUpdate += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onUpdate -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> This event will fire whenever the Vector3 value of the action is non-zero</summary>
-        public event AxisHandler onAxis { add { sourceMap[SteamVR_Input_Sources.Any].onAxis += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onAxis -= value; } }
+        public event AxisHandler onAxis
+        { add { sourceMap[SteamVR_Input_Sources.Any].onAxis += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onAxis -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the active state (ActionSet active and binding active) changes</summary>
-        public event ActiveChangeHandler onActiveChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
+        public event ActiveChangeHandler onActiveChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveChange -= value; } }
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> Event fires when the active state of the binding changes</summary>
-        public event ActiveChangeHandler onActiveBindingChange { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
+        public event ActiveChangeHandler onActiveBindingChange
+        { add { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange += value; } remove { sourceMap[SteamVR_Input_Sources.Any].onActiveBindingChange -= value; } }
 
 
         /// <summary><strong>[Shortcut to: SteamVR_Input_Sources.Any]</strong> The current Vector3 value of the action.
@@ -163,6 +171,14 @@ namespace Valve.VR
             sourceMap[inputSource].onAxis -= functionToStopCalling;
         }
 
+        /// <summary>
+        /// Removes all listeners, useful for dispose pattern
+        /// </summary>
+        public void RemoveAllListeners(SteamVR_Input_Sources input_Sources)
+        {
+            sourceMap[input_Sources].RemoveAllListeners();
+        }
+
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
         }
@@ -223,8 +239,10 @@ namespace Valve.VR
         public override bool lastChanged { get; protected set; }
 
         /// <summary>The handle to the origin of the component that was used to update the value for this action</summary>
-        public override ulong activeOrigin {
-            get {
+        public override ulong activeOrigin
+        {
+            get
+            {
                 if (active)
                     return actionData.activeOrigin;
 
@@ -273,6 +291,38 @@ namespace Valve.VR
 
             if (actionData_size == 0)
                 actionData_size = (uint)Marshal.SizeOf(typeof(InputAnalogActionData_t));
+        }
+
+        /// <summary>
+        /// Removes all listeners, useful for dispose pattern
+        /// </summary>
+        public void RemoveAllListeners()
+        {
+            Delegate[] delegates;
+
+            if (onAxis != null)
+            {
+                delegates = onAxis.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onAxis -= (SteamVR_Action_Vector3.AxisHandler)existingDelegate;
+            }
+
+            if (onUpdate != null)
+            {
+                delegates = onUpdate.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onUpdate -= (SteamVR_Action_Vector3.UpdateHandler)existingDelegate;
+            }
+
+            if (onChange != null)
+            {
+                delegates = onChange.GetInvocationList();
+                if (delegates != null)
+                    foreach (Delegate existingDelegate in delegates)
+                        onChange -= (SteamVR_Action_Vector3.ChangeHandler)existingDelegate;
+            }
         }
 
         /// <summary><strong>[Should not be called by user code]</strong>

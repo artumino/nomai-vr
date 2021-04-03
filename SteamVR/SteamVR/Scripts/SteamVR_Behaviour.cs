@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 
-#if true
-using UnityEngine.XR;
+#if UNITY_2017_2_OR_NEWER
+    using UnityEngine.XR;
 #else
 using XRSettings = UnityEngine.VR.VRSettings;
 using XRDevice = UnityEngine.VR.VRDevice;
@@ -16,8 +20,10 @@ namespace Valve.VR
         public static bool forcingInitialization = false;
 
         private static SteamVR_Behaviour _instance;
-        public static SteamVR_Behaviour instance {
-            get {
+        public static SteamVR_Behaviour instance
+        {
+            get
+            {
                 if (_instance == null)
                 {
                     Initialize(false);
@@ -167,31 +173,34 @@ namespace Valve.VR
         }
 #endif
 
-#if true
+#if UNITY_2017_1_OR_NEWER
         protected void OnEnable()
         {
-            Application.onBeforeRender += OnBeforeRender;
+		    Application.onBeforeRender += OnBeforeRender;
             SteamVR_Events.System(EVREventType.VREvent_Quit).Listen(OnQuit);
         }
         protected void OnDisable()
         {
-            Application.onBeforeRender -= OnBeforeRender;
+		    Application.onBeforeRender -= OnBeforeRender;
             SteamVR_Events.System(EVREventType.VREvent_Quit).Remove(OnQuit);
         }
-        protected void OnBeforeRender()
+	    protected void OnBeforeRender()
         {
             PreCull();
         }
 #else
-        protected void OnEnable () {
+        protected void OnEnable()
+        {
             Camera.onPreCull += OnCameraPreCull;
             SteamVR_Events.System(EVREventType.VREvent_Quit).Listen(OnQuit);
         }
-        protected void OnDisable () {
+        protected void OnDisable()
+        {
             Camera.onPreCull -= OnCameraPreCull;
             SteamVR_Events.System(EVREventType.VREvent_Quit).Remove(OnQuit);
         }
-        protected void OnCameraPreCull (Camera cam) {
+        protected void OnCameraPreCull(Camera cam)
+        {
             if (!cam.stereoEnabled)
                 return;
 
@@ -202,28 +211,40 @@ namespace Valve.VR
         protected static int lastFrameCount = -1;
         protected void PreCull()
         {
-            // Only update poses on the first camera per frame.
-            if (Time.frameCount != lastFrameCount)
+            if (OpenVR.Input != null)
             {
-                lastFrameCount = Time.frameCount;
+                // Only update poses on the first camera per frame.
+                if (Time.frameCount != lastFrameCount)
+                {
+                    lastFrameCount = Time.frameCount;
 
-                SteamVR_Input.OnPreCull();
+                    SteamVR_Input.OnPreCull();
+                }
             }
         }
 
         protected void FixedUpdate()
         {
-            SteamVR_Input.FixedUpdate();
+            if (OpenVR.Input != null)
+            {
+                SteamVR_Input.FixedUpdate();
+            }
         }
 
         protected void LateUpdate()
         {
-            SteamVR_Input.LateUpdate();
+            if (OpenVR.Input != null)
+            {
+                SteamVR_Input.LateUpdate();
+            }
         }
 
         protected void Update()
         {
-            SteamVR_Input.Update();
+            if (OpenVR.Input != null)
+            {
+                SteamVR_Input.Update();
+            }
         }
 
         protected void OnQuit(VREvent_t vrEvent)
@@ -231,7 +252,7 @@ namespace Valve.VR
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+		    Application.Quit();
 #endif
         }
     }

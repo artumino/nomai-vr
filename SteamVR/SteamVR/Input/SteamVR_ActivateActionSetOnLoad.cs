@@ -1,6 +1,7 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 
 using UnityEngine;
+using System.Collections;
 
 namespace Valve.VR
 {
@@ -18,13 +19,14 @@ namespace Valve.VR
         public bool activateOnStart = true;
         public bool deactivateOnDestroy = true;
 
+        public int initialPriority = 0;
 
         private void Start()
         {
             if (actionSet != null && activateOnStart)
             {
                 //Debug.Log(string.Format("[SteamVR] Activating {0} action set.", actionSet.fullPath));
-                actionSet.Activate(forSources, 0, disableAllOtherActionSets);
+                actionSet.Activate(forSources, initialPriority, disableAllOtherActionSets);
             }
         }
 
