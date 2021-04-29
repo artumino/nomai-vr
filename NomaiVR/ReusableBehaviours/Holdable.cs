@@ -9,28 +9,50 @@ namespace NomaiVR
     public class Holdable : MonoBehaviour
     {
         public bool IsOffhand { get; set; } = false;
-        private Transform _hand = HandsController.Behaviour.DominantHand;
         public bool CanFlipX { get; set; } = true;
         public Action<bool> onFlipped;
 
+        private Vector3 CurrentPositionOffset => PlayerHelper.IsWearingSuit() ? _glovePositionOffset : _handPositionOffset;
+        private SteamVR_Skeleton_Pose CurrentHoldPose => PlayerHelper.IsWearingSuit() ? _gloveHoldPose : _handHoldPose;
+
+        private Transform _hand = HandsController.Behaviour.DominantHand;
         private Transform _holdableTransform;
         private Transform _rotationTransform;
-        private Vector3 _positionOffset;
-
-        public SteamVR_Skeleton_Pose holdPose = AssetLoader.GrabbingHandlePose;
+        private Quaternion _rotationOffset;
+        private Vector3 _handPositionOffset;
+        private Vector3 _glovePositionOffset;
+        private SteamVR_Skeleton_Pose _handHoldPose = AssetLoader.GrabbingHandlePose;
+        private SteamVR_Skeleton_Pose _gloveHoldPose = AssetLoader.GrabbingHandlePose;
         private SteamVR_Skeleton_Poser _poser;
         private IActiveObserver _activeObserver;
+
+        public void SetPositionOffset(Vector3 handOffset, Vector3? gloveOffset = null)
+        {
+            _handPositionOffset = handOffset;
+            _glovePositionOffset = gloveOffset ?? handOffset;
+        }
+
+        public void SetPoses(SteamVR_Skeleton_Pose handPose, SteamVR_Skeleton_Pose glovePose = null)
+        {
+            _handHoldPose = handPose;
+            _gloveHoldPose = glovePose ?? handPose;
+        }
+
+        public void SetRotationOffset(Quaternion rotation)
+        {
+            _rotationOffset = rotation;
+        }
 
         internal void Start()
         {
             _holdableTransform = new GameObject().transform;
             _holdableTransform.parent = _hand.GetComponent<Hand>().Palm;
-            _holdableTransform.localPosition = _positionOffset = transform.localPosition;
+            _holdableTransform.localPosition = CurrentPositionOffset;
             _holdableTransform.localRotation = Quaternion.identity;
             _rotationTransform = new GameObject().transform;
             _rotationTransform.SetParent(_holdableTransform, false);
             _rotationTransform.localPosition = Vector3.zero;
-            _rotationTransform.localRotation = transform.localRotation;
+            _rotationTransform.localRotation = _rotationOffset;
             transform.parent = _rotationTransform;
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -46,19 +68,29 @@ namespace NomaiVR
 
             VRToolSwapper.InteractingHandChanged += OnInteractingHandChanged;
             ModSettings.OnConfigChange += OnInteractingHandChanged;
+            GlobalMessenger.AddListener("SuitUp", OnSuitChanged);
+            GlobalMessenger.AddListener("RemoveSuit", OnSuitChanged);
         }
 
         internal void OnDestroy()
         {
+            GlobalMessenger.RemoveListener("SuitUp", OnSuitChanged);
+            GlobalMessenger.RemoveListener("RemoveSuit", OnSuitChanged);
             ModSettings.OnConfigChange -= OnInteractingHandChanged;
             VRToolSwapper.InteractingHandChanged -= OnInteractingHandChanged;
+        }
+
+        internal void OnSuitChanged()
+        {
+            _poser.skeletonMainPose = CurrentHoldPose;
+            UpdateHoldableOffset(_hand == HandsController.Behaviour.RightHand);
         }
 
         private void SetupPoses()
         {
             transform.gameObject.SetActive(false);
             _poser = transform.gameObject.AddComponent<SteamVR_Skeleton_Poser>();
-            _poser.skeletonMainPose = holdPose;
+            _poser.skeletonMainPose = CurrentHoldPose;
             transform.gameObject.SetActive(true);
 
             //Listen for events to start poses
@@ -71,16 +103,24 @@ namespace NomaiVR
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
             if (_activeObserver != null)
             {
-                _activeObserver.OnActivate += () => _hand.GetComponent<Hand>().NotifyAttachedTo(_poser);
+                _activeObserver.OnActivate += () =>_hand.GetComponent<Hand>().NotifyAttachedTo(_poser);
                 _activeObserver.OnDeactivate += () => _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
             }
+        }
+
+        internal void UpdateHoldableOffset(bool isRight)
+        {
+            if (isRight)
+                _holdableTransform.localPosition = CurrentPositionOffset;
+            else
+                _holdableTransform.localPosition = new Vector3(-CurrentPositionOffset.x, CurrentPositionOffset.y, CurrentPositionOffset.z);
         }
 
         internal void OnInteractingHandChanged()
         {
             if(VRToolSwapper.InteractingHand?.transform != _hand)
             {
-                if (_hand != null && _activeObserver.IsActive)
+                if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
                     _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
 
                 _hand = IsOffhand ? VRToolSwapper.NonInteractingHand?.transform : VRToolSwapper.InteractingHand?.transform;
@@ -91,16 +131,14 @@ namespace NomaiVR
 
                 var isRight = _hand == HandsController.Behaviour.RightHand;
                 if (isRight)
-                {
                     _holdableTransform.localScale = new Vector3(1, 1, 1);
-                    _holdableTransform.localPosition = _positionOffset;
-                }
                 else
                 {
                     if (CanFlipX)
                         _holdableTransform.localScale = new Vector3(-1, 1, 1);
-                    _holdableTransform.localPosition = new Vector3(-_positionOffset.x, _positionOffset.y, _positionOffset.z);
                 }
+
+                UpdateHoldableOffset(isRight);
 
                 if (CanFlipX)
                 {
@@ -108,7 +146,7 @@ namespace NomaiVR
                     onFlipped?.Invoke(isRight);
                 }
 
-                if (_hand != null && _activeObserver.IsActive)
+                if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
                     handBehaviour.NotifyAttachedTo(_poser);
             }
         }

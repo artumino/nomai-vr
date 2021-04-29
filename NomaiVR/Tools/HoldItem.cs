@@ -20,20 +20,20 @@ namespace NomaiVR
                 _itemTool.transform.Find("LanternSocket").gameObject.AddComponent<Holdable>();
 
                 var scroll = _itemTool.transform.Find("ScrollSocket").gameObject.AddComponent<Holdable>();
-                scroll.transform.localPosition = new Vector3(0.02f, -0.04f, -0.03f);
-                scroll.transform.localRotation = Quaternion.Euler(321.2f, 104f, 194f);
+                scroll.SetPositionOffset(new Vector3(0.02f, -0.04f, -0.03f));
+                scroll.SetRotationOffset(Quaternion.Euler(321.2f, 104f, 194f));
 
                 var stone = _itemTool.transform.Find("SharedStoneSocket").gameObject.AddComponent<Holdable>();
-                stone.transform.localPosition = new Vector3(-0.05f, -0.01f, 0f);
-                stone.transform.localRotation = Quaternion.Euler(-22.8f, 0f, 0f);
+                stone.SetPositionOffset(new Vector3(-0.05f, -0.01f, 0f));
+                stone.SetRotationOffset(Quaternion.Euler(-22.8f, 0f, 0f));
 
                 var warpCore = _itemTool.transform.Find("WarpCoreSocket").gameObject.AddComponent<Holdable>();
-                warpCore.transform.localPosition = new Vector3(-0.06f, -0.07f, -0.05f);
-                warpCore.transform.localRotation = Quaternion.Euler(276.2f, 49f, 104f);
+                warpCore.SetPositionOffset(new Vector3(-0.06f, -0.07f, -0.05f));
+                warpCore.SetRotationOffset(Quaternion.Euler(276.2f, 49f, 104f));
 
                 var vesselCore = _itemTool.transform.Find("VesselCoreSocket").gameObject.AddComponent<Holdable>();
-                vesselCore.transform.localPosition = new Vector3(-0.01f, 0.03f, 0.01f);
-                vesselCore.transform.localRotation = Quaternion.Euler(-1.7f, 70.4f, 26f);
+                vesselCore.SetPositionOffset(new Vector3(-0.01f, 0.03f, 0.01f));
+                vesselCore.SetRotationOffset(Quaternion.Euler(-1.7f, 70.4f, 26f));
             }
 
             private void SetActive(bool active)

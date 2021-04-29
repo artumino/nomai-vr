@@ -23,7 +23,7 @@ namespace NomaiVR
                 stickRoot.localScale = scale;
 
                 var holdStick = stickRoot.gameObject.AddComponent<Holdable>();
-                holdStick.transform.localPosition = new Vector3(-0.02f, -0.023f, -0.34f);
+                holdStick.SetPositionOffset(new Vector3(-0.02f, -0.023f, -0.34f));
 
                 var mallow = stickRoot.Find("Stick_Tip/Mallow_Root").GetComponent<Marshmallow>();
 
@@ -66,8 +66,8 @@ namespace NomaiVR
                 mallowClone.localScale = scale;
 
                 var holdMallow = mallowClone.gameObject.AddComponent<Holdable>();
-                holdMallow.transform.localPosition = new Vector3(0.02f, -0.03f, -0.08f);
-                holdMallow.transform.localRotation = Quaternion.Euler(47.2f, 100f, 110f);
+                holdMallow.SetPositionOffset(new Vector3(0.02f, -0.03f, -0.08f));
+                holdMallow.SetRotationOffset(Quaternion.Euler(47.2f, 100f, 110f));
                 holdMallow.IsOffhand = true;
 
                 // Replace right hand mallow on proximity with left hand mallow.

@@ -55,8 +55,7 @@ namespace NomaiVR
             private Holdable SetUpHoldable(Transform translator)
             {
                 var holdTranslator = translator.gameObject.AddComponent<Holdable>();
-                holdTranslator.transform.localPosition = new Vector3(-0.1973f, 0.1283f, 0.0327f);
-                holdTranslator.transform.localRotation = Quaternion.identity;
+                holdTranslator.SetPositionOffset(new Vector3(-0.1973f, 0.1283f, 0.0327f));
                 holdTranslator.CanFlipX = true;
                 return holdTranslator;
             }
