@@ -31,6 +31,11 @@ namespace NomaiVR
                 ModSettings.OnConfigChange += SetHelmetScale;
             }
 
+            internal void OnDestroy()
+            {
+                ModSettings.OnConfigChange -= SetHelmetScale;
+            }
+
             public static void SetHelmetScale()
             {
                 var helmet = _instance?._helmet;
@@ -43,7 +48,7 @@ namespace NomaiVR
 
             private void FixCameraClipping()
             {
-                Camera.main.nearClipPlane = 0.01f;
+                Camera.main.nearClipPlane = 0.05f;
             }
 
             private HUDHelmetAnimator SetUpHelmetAnimator()
