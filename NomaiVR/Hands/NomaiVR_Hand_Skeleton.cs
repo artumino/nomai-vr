@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using Valve.VR;
 using Valve.VR.Helpers;
 
@@ -22,9 +23,9 @@ namespace NomaiVR
             _snapshotCleanRequested = true;
         }
 
-        public override void UpdateSkeletonTransforms()
+        public override void UpdateSkeletonTransforms(Vector3[] bonePositions, Quaternion[] boneRotations)
         {
-            base.UpdateSkeletonTransforms();
+            base.UpdateSkeletonTransforms(bonePositions, boneRotations);
 
             if(_snapshotCleanRequested && skeletonBlend > 0)
             {
