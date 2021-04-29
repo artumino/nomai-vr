@@ -5,6 +5,7 @@ namespace NomaiVR
 {
     internal class ChildThresholdObserver : MonoBehaviour, IActiveObserver
     {
+        public bool IsActive => _wasActive;
         public event Action OnActivate;
         public event Action OnDeactivate;
         public int childThreshold = 1;

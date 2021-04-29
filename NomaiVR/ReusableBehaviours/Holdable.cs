@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.VR;
 
 namespace NomaiVR
 {
@@ -18,11 +19,12 @@ namespace NomaiVR
 
         public SteamVR_Skeleton_Pose holdPose = AssetLoader.GrabbingHandlePose;
         private SteamVR_Skeleton_Poser _poser;
+        private IActiveObserver _activeObserver;
 
         internal void Start()
         {
             _holdableTransform = new GameObject().transform;
-            _holdableTransform.parent = _hand;
+            _holdableTransform.parent = _hand.GetComponent<Hand>().Palm;
             _holdableTransform.localPosition = _positionOffset = transform.localPosition;
             _holdableTransform.localRotation = Quaternion.identity;
             _rotationTransform = new GameObject().transform;
@@ -62,15 +64,15 @@ namespace NomaiVR
             //Listen for events to start poses
             Transform solveToolsTransform = transform.Find("Props_HEA_Signalscope") ??
                                             transform.Find("Props_HEA_ProbeLauncher") ??
-                                            transform.Find("TranslatorGroup/Props_HEA_Translator"); //Tried to find the first renderer bu the probelauncher has multiple of them, doing it this way for now...
-            IActiveObserver enableObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : null)
+                                            transform.Find("TranslatorGroup/Props_HEA_Translator"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
+            _activeObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : null)
                                                                         : transform.gameObject.AddComponent<ChildThresholdObserver>() as IActiveObserver;
 
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
-            if (enableObserver != null)
+            if (_activeObserver != null)
             {
-                enableObserver.OnActivate += () => hand.NotifyAttachedTo(_poser);
-                enableObserver.OnDeactivate += () => hand.NotifyDetachedFrom(_poser);
+                _activeObserver.OnActivate += () => _hand.GetComponent<Hand>().NotifyAttachedTo(_poser);
+                _activeObserver.OnDeactivate += () => _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
             }
         }
 
@@ -78,9 +80,14 @@ namespace NomaiVR
         {
             if(VRToolSwapper.InteractingHand?.transform != _hand)
             {
+                if (_hand != null && _activeObserver.IsActive)
+                    _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
+
                 _hand = IsOffhand ? VRToolSwapper.NonInteractingHand?.transform : VRToolSwapper.InteractingHand?.transform;
                 if (_hand == null) _hand = IsOffhand ? HandsController.Behaviour.OffHand : HandsController.Behaviour.DominantHand;
-                _holdableTransform.SetParent(_hand, false);
+
+                var handBehaviour = _hand.GetComponent<Hand>();
+                _holdableTransform.SetParent(handBehaviour.Palm, false);
 
                 var isRight = _hand == HandsController.Behaviour.RightHand;
                 if (isRight)
@@ -100,6 +107,9 @@ namespace NomaiVR
                     RestoreCanvases(isRight);
                     onFlipped?.Invoke(isRight);
                 }
+
+                if (_hand != null && _activeObserver.IsActive)
+                    handBehaviour.NotifyAttachedTo(_poser);
             }
         }
 

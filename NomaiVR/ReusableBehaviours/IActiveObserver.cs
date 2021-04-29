@@ -7,6 +7,7 @@ namespace NomaiVR
 {
     interface IActiveObserver
     {
+        bool IsActive { get; }
         event Action OnActivate;
         event Action OnDeactivate;
     }

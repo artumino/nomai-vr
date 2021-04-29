@@ -25,8 +25,8 @@ namespace NomaiVR
             Detector.SetTrackedObjects(HandsController.Behaviour.RightHand, HandsController.Behaviour.LeftHand);
             Detector.MinDistance = 0.2f;
 
-            Detector.OnEnter += (hand) => { hand.GetComponent<>().NotifyReachable(true); };
-            Detector.OnExit += (hand) => { hand.GetComponent<>().NotifyReachable(false); };
+            Detector.OnEnter += (hand) => { hand.GetComponent<Hand>().NotifyReachable(true); };
+            Detector.OnExit += (hand) => { hand.GetComponent<Hand>().NotifyReachable(false); };
 
             _renderers = gameObject.GetComponentsInChildren<MeshRenderer>();
             transform.localScale = Vector3.one * scale;
