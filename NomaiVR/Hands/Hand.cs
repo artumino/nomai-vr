@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using Valve.VR;
 using Valve.VR.Helpers;
@@ -7,6 +8,7 @@ namespace NomaiVR
 {
     public class Hand : MonoBehaviour
     {
+        public event Action Initialized;
         public GameObject handPrefab;
         public SteamVR_Action_Pose pose;
         public SteamVR_Skeleton_Pose fallbackPoint;
@@ -37,6 +39,8 @@ namespace NomaiVR
         {
             SetUpModel();
             SetUpVrPose();
+
+            Initialized?.Invoke();
         }
 
         private void SetUpModel()
@@ -44,6 +48,7 @@ namespace NomaiVR
             var handObject = Instantiate(handPrefab);
             handObject.SetActive(false);
             var hand = handObject.transform;
+            Palm = handObject.transform.Find("skeletal_hand/Root/wrist_r/HoldPoint");
 
             var renderers = handObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
             _handRenderer = renderers.Where(r => r.transform.name.Contains("Hand")).FirstOrDefault();
@@ -58,7 +63,6 @@ namespace NomaiVR
             SetUpModel(hand);
             _skeleton = SetUpSkeleton(handObject, hand);
 
-            Palm = handObject.transform.Find("skeletal_hand/Root/wrist_r/HoldPoint");
 
             handObject.SetActive(true);
         }
@@ -116,6 +120,9 @@ namespace NomaiVR
                 //Flip X axis of skeleton and skinned meshes
                 for (int i = 0; i < prefabTransform.childCount; i++)
                     prefabTransform.GetChild(i).localScale = new Vector3(-1, 1, 1);
+
+                //Flip back palm
+                Palm.localScale = new Vector3(-1, 1, 1);
 
                 //Enable SteamVR skeleton mirroring
                 skeletonDriver.mirroring = SteamVR_Behaviour_Skeleton.MirrorType.RightToLeft;
