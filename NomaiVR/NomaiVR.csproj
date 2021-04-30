@@ -216,6 +216,8 @@
     <None Include="Hands\Poses\grabbing_probelauncher_gloves.json" />
     <None Include="Hands\Poses\grabbing_translator.json" />
     <None Include="Hands\Poses\grabbing_translator_gloves.json" />
+    <None Include="Hands\Poses\holding_marshmallow.json" />
+    <None Include="Hands\Poses\holding_roastingstick_gloves.json" />
     <None Include="Hands\Poses\holding_scroll_gloves.json" />
     <None Include="Hands\Poses\holding_sharedstone.json" />
     <None Include="Hands\Poses\holding_sharedstone_gloves.json" />
