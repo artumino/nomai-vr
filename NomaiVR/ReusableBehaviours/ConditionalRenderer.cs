@@ -3,11 +3,16 @@ using UnityEngine;
 
 namespace NomaiVR
 {
-    internal class ConditionalRenderer : MonoBehaviour
+    internal class ConditionalRenderer : MonoBehaviour, IActiveObserver
     {
         public Func<bool> getShouldRender;
         private bool _shouldRender;
         private Vector3 _scale;
+
+        public event Action OnActivate;
+        public event Action OnDeactivate;
+
+        public bool IsActive => _shouldRender;
 
         internal void Start()
         {
@@ -19,6 +24,11 @@ namespace NomaiVR
         {
             _shouldRender = show;
             transform.localScale = show ? _scale : Vector3.zero;
+
+            if (show)
+                OnActivate?.Invoke();
+            else
+                OnDeactivate?.Invoke();
         }
 
         internal void Update()

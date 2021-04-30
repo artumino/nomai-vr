@@ -100,8 +100,9 @@ namespace NomaiVR
             //Listen for events to start poses
             Transform solveToolsTransform = transform.Find("Props_HEA_Signalscope") ??
                                             transform.Find("Props_HEA_ProbeLauncher") ??
-                                            transform.Find("TranslatorGroup/Props_HEA_Translator"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
-            _activeObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : null)
+                                            transform.Find("TranslatorGroup/Props_HEA_Translator") ??
+                                            transform.Find("Stick_Tip/Props_HEA_RoastingStick"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
+            _activeObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : _activeObserver = transform.GetComponentInChildren<ConditionalRenderer>())
                                                                         : transform.gameObject.AddComponent<ChildThresholdObserver>() as IActiveObserver;
 
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
