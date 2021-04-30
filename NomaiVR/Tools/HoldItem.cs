@@ -16,7 +16,12 @@ namespace NomaiVR
                 _itemTool = FindObjectOfType<ItemTool>();
                 _itemTool.transform.localScale = 1.8f * Vector3.one;
 
-                _itemTool.transform.Find("ItemSocket").gameObject.AddComponent<Holdable>();
+                //Used by wordstones
+                var wordStone = _itemTool.transform.Find("ItemSocket").gameObject.AddComponent<Holdable>();
+                wordStone.SetPositionOffset(new Vector3(-0.1652f, 0.0248f, 0.019f), new Vector3(-0.1804f, 0.013f, 0.019f));
+                wordStone.SetRotationOffset(Quaternion.Euler(0f, -90f, 10f));
+                wordStone.SetPoses(AssetLoader.Poses["holding_wordstone"]);
+
                 _itemTool.transform.Find("LanternSocket").gameObject.AddComponent<Holdable>();
 
                 var scroll = _itemTool.transform.Find("ScrollSocket").gameObject.AddComponent<Holdable>();
@@ -33,9 +38,11 @@ namespace NomaiVR
                 warpCore.SetPositionOffset(new Vector3(-0.06f, -0.07f, -0.05f));
                 warpCore.SetRotationOffset(Quaternion.Euler(276.2f, 49f, 104f));
 
+                //Comically warped pose, but it's the only way to hold this thing...
                 var vesselCore = _itemTool.transform.Find("VesselCoreSocket").gameObject.AddComponent<Holdable>();
-                vesselCore.SetPositionOffset(new Vector3(-0.01f, 0.03f, 0.01f));
+                vesselCore.SetPositionOffset(new Vector3(-0.0594f, 0.03f, 0.0256f));
                 vesselCore.SetRotationOffset(Quaternion.Euler(-1.7f, 70.4f, 26f));
+                vesselCore.SetPoses(AssetLoader.Poses["holding_vesselcore_gloves"], AssetLoader.Poses["holding_vesselcore_gloves"]);
             }
 
             private void SetActive(bool active)
