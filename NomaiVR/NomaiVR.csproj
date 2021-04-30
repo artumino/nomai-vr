@@ -210,6 +210,12 @@
     <None Include="Hands\Poses\fallback_fist.json" />
     <None Include="Hands\Poses\fallback_point.json" />
     <None Include="Hands\Poses\fallback_relaxed.json" />
+    <None Include="Hands\Poses\grabbing_handle.json" />
+    <None Include="Hands\Poses\grabbing_handle_gloves.json" />
+    <None Include="Hands\Poses\grabbing_probelauncher.json" />
+    <None Include="Hands\Poses\grabbing_probelauncher_gloves.json" />
+    <None Include="Hands\Poses\grabbing_translator.json" />
+    <None Include="Hands\Poses\grabbing_translator_gloves.json" />
     <None Include="Hands\Poses\reachFor.json" />
     <None Include="Input\Bindings\actions.json" />
     <None Include="Input\Bindings\index_knuckles.json" />

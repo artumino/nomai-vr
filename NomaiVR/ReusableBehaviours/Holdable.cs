@@ -13,7 +13,7 @@ namespace NomaiVR
         public Action<bool> onFlipped;
 
         private Vector3 CurrentPositionOffset => PlayerHelper.IsWearingSuit() ? _glovePositionOffset : _handPositionOffset;
-        private SteamVR_Skeleton_Pose CurrentHoldPose => PlayerHelper.IsWearingSuit() ? _gloveHoldPose : _handHoldPose;
+        private SteamVR_Skeleton_Poser CurrentPoser => PlayerHelper.IsWearingSuit() ? _glovePoser : _handPoser;
 
         private Transform _hand = HandsController.Behaviour.DominantHand;
         private Transform _holdableTransform;
@@ -22,8 +22,9 @@ namespace NomaiVR
         private Vector3 _handPositionOffset;
         private Vector3 _glovePositionOffset;
         private SteamVR_Skeleton_Pose _handHoldPose = AssetLoader.GrabbingHandlePose;
-        private SteamVR_Skeleton_Pose _gloveHoldPose = AssetLoader.GrabbingHandlePose;
-        private SteamVR_Skeleton_Poser _poser;
+        private SteamVR_Skeleton_Pose _gloveHoldPose = AssetLoader.GrabbingHandleGlovePose;
+        private SteamVR_Skeleton_Poser _handPoser;
+        private SteamVR_Skeleton_Poser _glovePoser;
         private IActiveObserver _activeObserver;
 
         public void SetPositionOffset(Vector3 handOffset, Vector3? gloveOffset = null)
@@ -82,15 +83,18 @@ namespace NomaiVR
 
         internal void OnSuitChanged()
         {
-            _poser.skeletonMainPose = CurrentHoldPose;
+            if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
+                _hand.GetComponent<Hand>().NotifyAttachedTo(CurrentPoser);
             UpdateHoldableOffset(_hand == HandsController.Behaviour.RightHand);
         }
 
         private void SetupPoses()
         {
             transform.gameObject.SetActive(false);
-            _poser = transform.gameObject.AddComponent<SteamVR_Skeleton_Poser>();
-            _poser.skeletonMainPose = CurrentHoldPose;
+            _handPoser = transform.gameObject.AddComponent<SteamVR_Skeleton_Poser>();
+            _handPoser.skeletonMainPose = _handHoldPose;
+            _glovePoser = transform.gameObject.AddComponent<SteamVR_Skeleton_Poser>();
+            _glovePoser.skeletonMainPose = _gloveHoldPose;
             transform.gameObject.SetActive(true);
 
             //Listen for events to start poses
@@ -103,8 +107,8 @@ namespace NomaiVR
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
             if (_activeObserver != null)
             {
-                _activeObserver.OnActivate += () =>_hand.GetComponent<Hand>().NotifyAttachedTo(_poser);
-                _activeObserver.OnDeactivate += () => _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
+                _activeObserver.OnActivate += () =>_hand.GetComponent<Hand>().NotifyAttachedTo(CurrentPoser);
+                _activeObserver.OnDeactivate += () => _hand.GetComponent<Hand>().NotifyDetachedFrom(CurrentPoser);
             }
         }
 
@@ -121,7 +125,7 @@ namespace NomaiVR
             if(VRToolSwapper.InteractingHand?.transform != _hand)
             {
                 if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
-                    _hand.GetComponent<Hand>().NotifyDetachedFrom(_poser);
+                    _hand.GetComponent<Hand>().NotifyDetachedFrom(CurrentPoser);
 
                 _hand = IsOffhand ? VRToolSwapper.NonInteractingHand?.transform : VRToolSwapper.InteractingHand?.transform;
                 if (_hand == null) _hand = IsOffhand ? HandsController.Behaviour.OffHand : HandsController.Behaviour.DominantHand;
@@ -147,7 +151,7 @@ namespace NomaiVR
                 }
 
                 if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
-                    handBehaviour.NotifyAttachedTo(_poser);
+                    handBehaviour.NotifyAttachedTo(CurrentPoser);
             }
         }
 

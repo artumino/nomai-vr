@@ -28,7 +28,7 @@ namespace NomaiVR
                 _signalscope = Camera.main.transform.Find("Signalscope").GetComponent<Signalscope>();
 
                 var holdSignalscope = _signalscope.gameObject.AddComponent<Holdable>();
-                holdSignalscope.SetPositionOffset(new Vector3(0.0074f, 0.0808f, 0.1343f));
+                holdSignalscope.SetPositionOffset(new Vector3(0.0074f, 0.0808f, 0.1343f), new Vector3(0.0046f, 0.1255f, 0.1625f));
 
                 var signalScopeModel = _signalscope.transform.GetChild(0);
                 // Tools have a special shader that draws them on top of everything
