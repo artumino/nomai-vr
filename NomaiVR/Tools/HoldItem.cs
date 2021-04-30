@@ -20,12 +20,14 @@ namespace NomaiVR
                 _itemTool.transform.Find("LanternSocket").gameObject.AddComponent<Holdable>();
 
                 var scroll = _itemTool.transform.Find("ScrollSocket").gameObject.AddComponent<Holdable>();
-                scroll.SetPositionOffset(new Vector3(0.02f, -0.04f, -0.03f));
-                scroll.SetRotationOffset(Quaternion.Euler(321.2f, 104f, 194f));
+                scroll.SetPositionOffset(new Vector3(-0.022f, -0.033f, -0.03f), new Vector3(-0.0436f, -0.033f, -0.03f));
+                scroll.SetRotationOffset(Quaternion.Euler(352.984f, 97.98601f, 223.732f));
+                scroll.SetPoses(AssetLoader.Poses["holding_scroll_gloves"], AssetLoader.Poses["holding_scroll_gloves"]);
 
                 var stone = _itemTool.transform.Find("SharedStoneSocket").gameObject.AddComponent<Holdable>();
-                stone.SetPositionOffset(new Vector3(-0.05f, -0.01f, 0f));
+                stone.SetPositionOffset(new Vector3(-0.1139f, -0.0041f, 0.0193f));
                 stone.SetRotationOffset(Quaternion.Euler(-22.8f, 0f, 0f));
+                stone.SetPoses(AssetLoader.Poses["holding_sharedstone"], AssetLoader.Poses["holding_sharedstone_gloves"]);
 
                 var warpCore = _itemTool.transform.Find("WarpCoreSocket").gameObject.AddComponent<Holdable>();
                 warpCore.SetPositionOffset(new Vector3(-0.06f, -0.07f, -0.05f));
