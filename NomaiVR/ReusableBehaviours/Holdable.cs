@@ -68,10 +68,8 @@ namespace NomaiVR
 
         internal void Start()
         {
-            UpdateHand();
             _holdableTransform = new GameObject().transform;
-            _holdableTransform.parent = _hand.GetComponent<Hand>().Palm;
-            _holdableTransform.localPosition = CurrentPositionOffset;
+            _holdableTransform.localPosition = _positionOffset = transform.localPosition;
             _holdableTransform.localRotation = Quaternion.identity;
             _rotationTransform = new GameObject().transform;
             _rotationTransform.SetParent(_holdableTransform, false);
@@ -89,6 +87,7 @@ namespace NomaiVR
             }
 
             SetupPoses();
+            OnInteractingHandChanged();
 
             VRToolSwapper.InteractingHandChanged += OnInteractingHandChanged;
             ModSettings.OnConfigChange += OnInteractingHandChanged;
