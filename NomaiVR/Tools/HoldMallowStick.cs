@@ -31,8 +31,8 @@ namespace NomaiVR
                 _holdableStick = stickRoot.gameObject.AddComponent<Holdable>();
                 _holdableStick.SetPositionOffset(new Vector3(-0.029f, -0.174f, -0.29f));
                 _holdableStick.SetRotationOffset(Quaternion.Euler(-20f, 0, 0));
-                _holdableStick.SetPoses(AssetLoader.GrabbingHandlePose, AssetLoader.GrabbingHandleGlovePose);
-                _holdableStick.SetBlendPoses(AssetLoader.Poses["holding_roastingstick_gloves"]);
+                _holdableStick.SetPoses(AssetLoader.Poses["holding_roastingstick_tip"], AssetLoader.Poses["holding_roastingstick_tip"]);
+                _holdableStick.SetBlendPoses(AssetLoader.Poses["holding_roastingstick_gloves"], blendSpeed: 10);
 
                 var mallow = stickRoot.Find("Stick_Tip/Mallow_Root").GetComponent<Marshmallow>();
 

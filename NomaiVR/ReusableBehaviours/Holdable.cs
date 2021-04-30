@@ -27,6 +27,7 @@ namespace NomaiVR
         private SteamVR_Skeleton_Pose _gloveBlendedPose;
         private SteamVR_Skeleton_Poser _handPoser;
         private SteamVR_Skeleton_Poser _glovePoser;
+        private float _blendSpeed;
         private IActiveObserver _activeObserver;
 
         public void SetPositionOffset(Vector3 handOffset, Vector3? gloveOffset = null)
@@ -41,8 +42,9 @@ namespace NomaiVR
             _gloveHoldPose = glovePose ?? handPose;
         }
 
-        public void SetBlendPoses(SteamVR_Skeleton_Pose handBlendedPose, SteamVR_Skeleton_Pose gloveBlendedPose = null)
+        public void SetBlendPoses(SteamVR_Skeleton_Pose handBlendedPose, SteamVR_Skeleton_Pose gloveBlendedPose = null, float blendSpeed = 0f)
         {
+            _blendSpeed = blendSpeed;
             _handBlendedPose = handBlendedPose;
             _gloveBlendedPose = gloveBlendedPose ?? handBlendedPose;
         }
@@ -69,7 +71,6 @@ namespace NomaiVR
         internal void Start()
         {
             _holdableTransform = new GameObject().transform;
-            _holdableTransform.localPosition = _positionOffset = transform.localPosition;
             _holdableTransform.localRotation = Quaternion.identity;
             _rotationTransform = new GameObject().transform;
             _rotationTransform.SetParent(_holdableTransform, false);
@@ -133,11 +134,11 @@ namespace NomaiVR
                 Transform solveToolsTransform = transform.Find("Props_HEA_Signalscope") ??
                                                 transform.Find("Props_HEA_ProbeLauncher") ??
                                                 transform.Find("TranslatorGroup/Props_HEA_Translator"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
-                _activeObserver = transform.GetComponentInChildren<IActiveObserver>();
+                _activeObserver = transform.GetComponent<IActiveObserver>();
                 if (_activeObserver == null)
                 {
-                    _activeObserver = solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() as IActiveObserver :
-                                        (transform.childCount == 0 ? transform.gameObject.AddComponent<ChildThresholdObserver>() : null);
+                    _activeObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : null)
+                                        : transform.gameObject.AddComponent<ChildThresholdObserver>() as IActiveObserver;
                 }
             }
 
@@ -158,6 +159,7 @@ namespace NomaiVR
                 enabled = true,
                 pose = 1,
                 name = "blend_behaviour",
+                smoothingSpeed = _blendSpeed,
                 value = 0
             });
         }
