@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NomaiVR
 {
-    interface IActiveObserver
+    public interface IActiveObserver
     {
         bool IsActive { get; }
         event Action OnActivate;

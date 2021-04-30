@@ -8,6 +8,7 @@ namespace NomaiVR
         public Func<bool> getShouldRender;
         private bool _shouldRender;
         private Vector3 _scale;
+        private Renderer _renderer;
 
         public event Action OnActivate;
         public event Action OnDeactivate;
@@ -17,13 +18,24 @@ namespace NomaiVR
         internal void Start()
         {
             _scale = transform.localScale;
+            _renderer = GetComponent<Renderer>();
             SetShow(false);
+        }
+
+        internal void OnDisable()
+        {
+            _shouldRender = false;
+            OnDeactivate?.Invoke();
         }
 
         protected virtual void SetShow(bool show)
         {
             _shouldRender = show;
-            transform.localScale = show ? _scale : Vector3.zero;
+
+            if (_renderer != null)
+                _renderer.enabled = show;
+            else
+                transform.localScale = show ? _scale : Vector3.zero;
 
             if (show)
                 OnActivate?.Invoke();

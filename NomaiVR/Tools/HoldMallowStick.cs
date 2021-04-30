@@ -52,9 +52,14 @@ namespace NomaiVR
                     }
                 }
 
+                bool ShouldRenderStick()
+                {
+                    return !InputHelper.IsUIInteractionMode();
+                }
+
                 bool ShouldRenderMallowClone()
                 {
-                    return _stickController.enabled && mallow.GetState() == Marshmallow.MallowState.Gone;
+                    return ShouldRenderStick() && _stickController.enabled && mallow.GetState() == Marshmallow.MallowState.Gone;
                 }
 
                 // Eat mallow by moving it to player head.
@@ -67,6 +72,11 @@ namespace NomaiVR
                 var meshes = stickRoot.Find("Stick_Tip/Props_HEA_RoastingStick");
                 meshes.Find("RoastingStick_Arm").GetComponent<Renderer>().enabled = false;
                 meshes.Find("RoastingStick_Arm_NoSuit").GetComponent<Renderer>().enabled = false;
+
+                //Render stick only when outside menus
+                var stickRenderer = meshes.Find("RoastingStick_Stick").gameObject.AddComponent<ConditionalRenderer>();
+                stickRenderer.getShouldRender += ShouldRenderStick;
+                _holdableStick.SetActiveObserver(stickRenderer);
 
                 // Hold mallow in left hand for replacing the one in the stick.
                 var mallowModel = mallow.transform.Find("Props_HEA_Marshmallow");

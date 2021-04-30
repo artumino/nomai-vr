@@ -47,6 +47,11 @@ namespace NomaiVR
             _gloveBlendedPose = gloveBlendedPose ?? handBlendedPose;
         }
 
+        public void SetActiveObserver(IActiveObserver observer)
+        {
+            _activeObserver = observer;
+        }
+
         public void UpdateBlending(float blendAmmount)
         {
             if(_handBlendedPose != null)
@@ -124,15 +129,17 @@ namespace NomaiVR
             transform.gameObject.SetActive(true);
 
             //Listen for events to start poses
-            Transform solveToolsTransform = transform.Find("Props_HEA_Signalscope") ??
-                                            transform.Find("Props_HEA_ProbeLauncher") ??
-                                            transform.Find("TranslatorGroup/Props_HEA_Translator") ??
-                                            transform.Find("Stick_Tip/Props_HEA_RoastingStick"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
-            _activeObserver = transform.GetComponent<ConditionalRenderer>();
             if (_activeObserver == null)
             {
-                _activeObserver = solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() as IActiveObserver :
-                                    (transform.childCount > 0 ? transform.gameObject.AddComponent<ChildThresholdObserver>() : null);
+                Transform solveToolsTransform = transform.Find("Props_HEA_Signalscope") ??
+                                                transform.Find("Props_HEA_ProbeLauncher") ??
+                                                transform.Find("TranslatorGroup/Props_HEA_Translator"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
+                _activeObserver = transform.GetComponentInChildren<IActiveObserver>();
+                if (_activeObserver == null)
+                {
+                    _activeObserver = solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() as IActiveObserver :
+                                        (transform.childCount == 0 ? transform.gameObject.AddComponent<ChildThresholdObserver>() : null);
+                }
             }
 
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
