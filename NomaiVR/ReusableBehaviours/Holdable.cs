@@ -23,6 +23,8 @@ namespace NomaiVR
         private Vector3 _glovePositionOffset;
         private SteamVR_Skeleton_Pose _handHoldPose = AssetLoader.GrabbingHandlePose;
         private SteamVR_Skeleton_Pose _gloveHoldPose = AssetLoader.GrabbingHandleGlovePose;
+        private SteamVR_Skeleton_Pose _handBlendedPose;
+        private SteamVR_Skeleton_Pose _gloveBlendedPose;
         private SteamVR_Skeleton_Poser _handPoser;
         private SteamVR_Skeleton_Poser _glovePoser;
         private IActiveObserver _activeObserver;
@@ -37,6 +39,21 @@ namespace NomaiVR
         {
             _handHoldPose = handPose;
             _gloveHoldPose = glovePose ?? handPose;
+        }
+
+        public void SetBlendPoses(SteamVR_Skeleton_Pose handBlendedPose, SteamVR_Skeleton_Pose gloveBlendedPose = null)
+        {
+            _handBlendedPose = handBlendedPose;
+            _gloveBlendedPose = gloveBlendedPose ?? handBlendedPose;
+        }
+
+        public void UpdateBlending(float blendAmmount)
+        {
+            if(_handBlendedPose != null)
+            {
+                _handPoser.SetBlendingBehaviourValue("blend_behaviour", blendAmmount);
+                _glovePoser.SetBlendingBehaviourValue("blend_behaviour", blendAmmount);
+            }
         }
 
         public void SetRotationOffset(Quaternion rotation)
@@ -95,6 +112,14 @@ namespace NomaiVR
             _handPoser.skeletonMainPose = _handHoldPose;
             _glovePoser = transform.gameObject.AddComponent<SteamVR_Skeleton_Poser>();
             _glovePoser.skeletonMainPose = _gloveHoldPose;
+
+            //Setup Blending Behaviours if needed
+            if(_handBlendedPose != null)
+            {
+                SetupBlending(_handPoser, _handBlendedPose);
+                SetupBlending(_glovePoser, _gloveBlendedPose);
+            }
+
             transform.gameObject.SetActive(true);
 
             //Listen for events to start poses
@@ -102,8 +127,12 @@ namespace NomaiVR
                                             transform.Find("Props_HEA_ProbeLauncher") ??
                                             transform.Find("TranslatorGroup/Props_HEA_Translator") ??
                                             transform.Find("Stick_Tip/Props_HEA_RoastingStick"); //Tried to find the first renderer but the probelauncher has multiple of them, doing it this way for now...
-            _activeObserver = transform.childCount > 0 ? (solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() : _activeObserver = transform.GetComponentInChildren<ConditionalRenderer>())
-                                                                        : transform.gameObject.AddComponent<ChildThresholdObserver>() as IActiveObserver;
+            _activeObserver = transform.GetComponent<ConditionalRenderer>();
+            if (_activeObserver == null)
+            {
+                _activeObserver = solveToolsTransform != null ? solveToolsTransform.gameObject.AddComponent<EnableObserver>() as IActiveObserver :
+                                    (transform.childCount > 0 ? transform.gameObject.AddComponent<ChildThresholdObserver>() : null);
+            }
 
             // Both this holdable and the observer should be destroyed at the end of a cycle so no leaks here
             if (_activeObserver != null)
@@ -111,6 +140,19 @@ namespace NomaiVR
                 _activeObserver.OnActivate += () =>_hand.GetComponent<Hand>().NotifyAttachedTo(CurrentPoser);
                 _activeObserver.OnDeactivate += () => _hand.GetComponent<Hand>().NotifyDetachedFrom(CurrentPoser);
             }
+        }
+
+        private void SetupBlending(SteamVR_Skeleton_Poser poser, SteamVR_Skeleton_Pose blendedPose)
+        {
+            poser.skeletonAdditionalPoses.Add(blendedPose);
+            poser.blendingBehaviours.Add(new SteamVR_Skeleton_Poser.PoseBlendingBehaviour()
+            {
+                type = SteamVR_Skeleton_Poser.PoseBlendingBehaviour.BlenderTypes.Manual,
+                enabled = true,
+                pose = 1,
+                name = "blend_behaviour",
+                value = 0
+            });
         }
 
         internal void UpdateHoldableOffset(bool isRight)

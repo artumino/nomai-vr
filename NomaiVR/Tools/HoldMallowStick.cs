@@ -1,4 +1,5 @@
 ﻿using OWML.Utils;
+using System;
 using UnityEngine;
 
 namespace NomaiVR
@@ -8,24 +9,30 @@ namespace NomaiVR
         protected override bool IsPersistent => false;
         protected override OWScene[] Scenes => PlayableScenes;
 
+        internal static event Action StickExtensionUpdated;
+
         public class Behaviour : MonoBehaviour
         {
+            private RoastingStickController _stickController;
+            private Holdable _holdableStick;
+
             internal void Start()
             {
 
                 var scale = Vector3.one * 0.75f;
-                var stickController = Locator.GetPlayerBody().transform.Find("RoastingSystem").GetComponent<RoastingStickController>();
+                _stickController = Locator.GetPlayerBody().transform.Find("RoastingSystem").GetComponent<RoastingStickController>();
 
                 // Move the stick forward while not pressing RT.
-                stickController._stickMinZ = 1f;
+                _stickController._stickMinZ = 1f;
 
-                var stickRoot = stickController.transform.Find("Stick_Root/Stick_Pivot");
+                var stickRoot = _stickController.transform.Find("Stick_Root/Stick_Pivot");
                 stickRoot.localScale = scale;
 
-                var holdStick = stickRoot.gameObject.AddComponent<Holdable>();
-                holdStick.SetPositionOffset(new Vector3(-0.029f, -0.174f, -0.29f));
-                holdStick.SetRotationOffset(Quaternion.Euler(-20f, 0, 0));
-                holdStick.SetPoses(AssetLoader.Poses["holding_roastingstick_gloves"]);
+                _holdableStick = stickRoot.gameObject.AddComponent<Holdable>();
+                _holdableStick.SetPositionOffset(new Vector3(-0.029f, -0.174f, -0.29f));
+                _holdableStick.SetRotationOffset(Quaternion.Euler(-20f, 0, 0));
+                _holdableStick.SetPoses(AssetLoader.GrabbingHandlePose, AssetLoader.GrabbingHandleGlovePose);
+                _holdableStick.SetBlendPoses(AssetLoader.Poses["holding_roastingstick_gloves"]);
 
                 var mallow = stickRoot.Find("Stick_Tip/Mallow_Root").GetComponent<Marshmallow>();
 
@@ -47,7 +54,7 @@ namespace NomaiVR
 
                 bool ShouldRenderMallowClone()
                 {
-                    return stickController.enabled && mallow.GetState() == Marshmallow.MallowState.Gone;
+                    return _stickController.enabled && mallow.GetState() == Marshmallow.MallowState.Gone;
                 }
 
                 // Eat mallow by moving it to player head.
@@ -80,6 +87,20 @@ namespace NomaiVR
 
                 // Render left hand mallow only when right hand mallow is not present.
                 mallowClone.gameObject.AddComponent<ConditionalRenderer>().getShouldRender += ShouldRenderMallowClone;
+
+                //Register for blending updates
+                StickExtensionUpdated += OnStickExtensionUpdate;
+            }
+
+            internal void OnDestroy()
+            {
+                StickExtensionUpdated -= OnStickExtensionUpdate;
+            }
+
+            internal void OnStickExtensionUpdate()
+            {
+                if (_stickController != null && _holdableStick != null)
+                    _holdableStick.UpdateBlending(_stickController._extendFraction);
             }
 
             public class Patch : NomaiVRPatch
@@ -96,6 +117,7 @@ namespace NomaiVR
                 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Result required for return passthrough")]
                 private static float PostCalculateMaxStickExtension(float __result, float ____stickMaxZ)
                 {
+                    StickExtensionUpdated?.Invoke();
                     return ____stickMaxZ;
                 }
             }
