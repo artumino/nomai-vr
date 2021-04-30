@@ -63,6 +63,7 @@ namespace NomaiVR
 
         internal void Start()
         {
+            UpdateHand();
             _holdableTransform = new GameObject().transform;
             _holdableTransform.parent = _hand.GetComponent<Hand>().Palm;
             _holdableTransform.localPosition = CurrentPositionOffset;
@@ -162,6 +163,12 @@ namespace NomaiVR
             else
                 _holdableTransform.localPosition = new Vector3(-CurrentPositionOffset.x, CurrentPositionOffset.y, CurrentPositionOffset.z);
         }
+        
+        internal void UpdateHand()
+        {
+            _hand = IsOffhand ? VRToolSwapper.NonInteractingHand?.transform : VRToolSwapper.InteractingHand?.transform;
+            if (_hand == null) _hand = IsOffhand ? HandsController.Behaviour.OffHand : HandsController.Behaviour.DominantHand;
+        }
 
         internal void OnInteractingHandChanged()
         {
@@ -170,8 +177,7 @@ namespace NomaiVR
                 if (_hand != null && _activeObserver != null && _activeObserver.IsActive)
                     _hand.GetComponent<Hand>().NotifyDetachedFrom(CurrentPoser);
 
-                _hand = IsOffhand ? VRToolSwapper.NonInteractingHand?.transform : VRToolSwapper.InteractingHand?.transform;
-                if (_hand == null) _hand = IsOffhand ? HandsController.Behaviour.OffHand : HandsController.Behaviour.DominantHand;
+                UpdateHand();
 
                 var handBehaviour = _hand.GetComponent<Hand>();
                 _holdableTransform.SetParent(handBehaviour.Palm, false);
