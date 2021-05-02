@@ -223,6 +223,8 @@
     <None Include="Hands\Poses\holding_sharedstone.json" />
     <None Include="Hands\Poses\holding_sharedstone_gloves.json" />
     <None Include="Hands\Poses\holding_vesselcore_gloves.json" />
+    <None Include="Hands\Poses\holding_warpcore.json" />
+    <None Include="Hands\Poses\holding_warpcore_gloves.json" />
     <None Include="Hands\Poses\holding_wordstone.json" />
     <None Include="Hands\Poses\reachFor.json" />
     <None Include="Input\Bindings\actions.json" />
