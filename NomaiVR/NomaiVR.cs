@@ -23,6 +23,7 @@ namespace NomaiVR
             // Load all modules.
             // I'm sorry to say that order does matter here.
             new ForceSettings();
+            new SinglePassStereoFix();
             new ControllerInput();
             new Dialogue();
             new FogFix();

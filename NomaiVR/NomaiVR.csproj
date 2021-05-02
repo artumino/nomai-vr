@@ -128,6 +128,7 @@
     <Compile Include="EffectFixes\LoopTransitionFix.cs" />
     <Compile Include="EffectFixes\ProjectionStoneCameraFix.cs" />
     <Compile Include="EffectFixes\CameraMaskFix.cs" />
+    <Compile Include="EffectFixes\SinglePassStereoFix.cs" />
     <Compile Include="EffectFixes\VisorEffectsFix.cs" />
     <Compile Include="FatalErrorChecker.cs" />
     <Compile Include="Hands\NomaiVR_Hand_Skeleton.cs" />

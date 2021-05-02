@@ -1,0 +1,19 @@
+diff --git a/UnityVRPatcher/Program.cs b/UnityVRPatcher/Program.cs
+index dc374dc..c5c358a 100644
+--- a/UnityVRPatcher/Program.cs
++++ b/UnityVRPatcher/Program.cs
+@@ -88,7 +88,14 @@ namespace UnityVRPatcher
+             AssetTypeValueField[] vrDevicesList = new AssetTypeValueField[] { StringField("OpenVR", stringTemplate) };
+             enabledVRDevices.SetChildrenList(vrDevicesList);
+ 
++
++            AssetFileInfoEx playerSettings = ggmTable.GetAssetInfo(1);
++            AssetTypeValueField playerSettingsBase = am.GetATI(ggmFile, playerSettings).GetBaseField();
++            AssetTypeValueField steroRenderingPath = playerSettingsBase.Get("m_StereoRenderingPath");
++            steroRenderingPath.value = new AssetTypeValue(EnumValueTypes.ValueType_Int32, 1);
++
+             replacers.Add(new AssetsReplacerFromMemory(0, buildSettings.index, (int)buildSettings.curFileType, 0xffff, buildSettingsBase.WriteToByteArray()));
++            replacers.Add(new AssetsReplacerFromMemory(0, playerSettings.index, (int)playerSettings.curFileType, 0xffff, playerSettingsBase.WriteToByteArray()));
+ 
+             using (AssetsFileWriter writer = new AssetsFileWriter(File.OpenWrite(gameManagersPath)))
+             {
