@@ -35,7 +35,7 @@ namespace NomaiVR
                 stone.SetPoses(AssetLoader.Poses["holding_sharedstone"], AssetLoader.Poses["holding_sharedstone_gloves"]);
 
                 var warpCore = _itemTool.transform.Find("WarpCoreSocket").gameObject.AddComponent<Holdable>();
-                warpCore.SetPositionOffset(new Vector3(-0.114f, -0.0495f, -0.021f));
+                warpCore.SetPositionOffset(new Vector3(-0.114f, -0.03f, -0.021f));
                 warpCore.SetRotationOffset(Quaternion.Euler(-10f, 0f, 90f));
                 warpCore.SetPoses(AssetLoader.Poses["holding_warpcore"], AssetLoader.Poses["holding_warpcore_gloves"]);
 
