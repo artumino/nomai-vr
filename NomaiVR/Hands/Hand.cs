@@ -8,6 +8,9 @@ namespace NomaiVR
 {
     public class Hand : MonoBehaviour
     {
+        private const float k_HandSkeletonBlendAmmount = 0.5f;
+        private const float k_GloveSkeletonBlendAmmount = 0.275f;
+
         public event Action Initialized;
         public GameObject handPrefab;
         public SteamVR_Action_Pose pose;
@@ -41,6 +44,15 @@ namespace NomaiVR
             SetUpVrPose();
 
             Initialized?.Invoke();
+
+            GlobalMessenger.AddListener("SuitUp", OnSuitChanged);
+            GlobalMessenger.AddListener("RemoveSuit", OnSuitChanged);
+        }
+
+        internal void OnDestroy()
+        {
+            GlobalMessenger.RemoveListener("SuitUp", OnSuitChanged);
+            GlobalMessenger.RemoveListener("RemoveSuit", OnSuitChanged);
         }
 
         private void SetUpModel()
@@ -203,6 +215,20 @@ namespace NomaiVR
             return skeletonDriver;
         }
 
+        internal void OnSuitChanged()
+        {
+            //This is done to avoid clipping the gloves when the hand is closed
+            if(_handState == EHandState.Free)
+                UpdateSkeletonBlendAmmount();
+        }
+
+        internal void UpdateSkeletonBlendAmmount()
+        {
+            float blendAmmount = ShouldRenderGloves() ? k_GloveSkeletonBlendAmmount : k_HandSkeletonBlendAmmount;
+            _skeleton.BlendTo(blendAmmount, 0.1f);
+            _skeleton.ClearSnapshot();
+        }
+
         internal void ResetSkeletonBlend()
         {
             if (_skeleton == null)
@@ -210,28 +236,27 @@ namespace NomaiVR
 
             _skeleton.BlendToSkeleton();
             _skeleton.ResetTemporaryRangeOfMotion();
-            _skeleton.BlendTo(0.5f, 0.1f);
-            _skeleton.ClearSnapshot();
+            UpdateSkeletonBlendAmmount();
 
             _lastHandState = _handState;
             _handState = EHandState.Free;
         }
 
-        internal void BlendToReach()
+        internal void BlendToReach(SteamVR_Skeleton_Poser overrideReachPoser = null, float time = 0.1f)
         {
-            _skeleton.BlendToPoser(_reachPoser);
+            _skeleton.BlendToPoser(overrideReachPoser ?? _reachPoser, time);
             _lastHandState = _handState;
             _handState = EHandState.Reaching;
         }
 
-        internal void BlendToPoser(SteamVR_Skeleton_Poser poser)
+        internal void BlendToPoser(SteamVR_Skeleton_Poser poser, float time = 0.1f)
         {
             _lastHandState = _handState;
             _handState = EHandState.Holding;
-            _skeleton.BlendToPoser(poser);
+            _skeleton.BlendToPoser(poser, time);
         }
 
-        internal void NotifyReachable(bool canReach)
+        internal void NotifyReachable(bool canReach, SteamVR_Skeleton_Poser poser = null)
         {
             if (_handState == EHandState.Holding)
             {
@@ -240,7 +265,7 @@ namespace NomaiVR
             }
 
             if (canReach)
-                BlendToReach();
+                BlendToReach(poser);
             else
                 ResetSkeletonBlend();
         }
