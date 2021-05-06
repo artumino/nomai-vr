@@ -68,6 +68,7 @@ namespace NomaiVR
             {
                 renderer.enabled = visible;
             }
+            Detector.enabled = visible;
             _visible = visible;
         }
 
@@ -118,9 +119,9 @@ namespace NomaiVR
             UpdateVisibility();
             var player = Locator.GetPlayerTransform();
             position.y = ModSettings.ToolbeltHeight;
-            transform.position = Locator.GetPlayerCamera().transform.position + player.TransformVector(position);
-            transform.rotation = player.rotation;
-            transform.Rotate(angle);
+            _cachedTransform.position = Locator.GetPlayerCamera().transform.position + player.TransformVector(position);
+            _cachedTransform.rotation = player.rotation;
+            _cachedTransform.Rotate(angle);
         }
     }
 }

@@ -220,6 +220,8 @@ namespace NomaiVR
             //This is done to avoid clipping the gloves when the hand is closed
             if(_handState == EHandState.Free)
                 UpdateSkeletonBlendAmmount();
+            if(_handState == EHandState.Reaching)
+                _skeleton.basePoseInfluence = ShouldRenderGloves() ? k_GloveSkeletonBlendAmmount : k_HandSkeletonBlendAmmount;
         }
 
         internal void UpdateSkeletonBlendAmmount()
@@ -234,6 +236,7 @@ namespace NomaiVR
             if (_skeleton == null)
                 return;
 
+            _skeleton.basePoseInfluence = 0;
             _skeleton.BlendToSkeleton();
             _skeleton.ResetTemporaryRangeOfMotion();
             UpdateSkeletonBlendAmmount();
@@ -245,12 +248,14 @@ namespace NomaiVR
         internal void BlendToReach(SteamVR_Skeleton_Poser overrideReachPoser = null, float time = 0.1f)
         {
             _skeleton.BlendToPoser(overrideReachPoser ?? _reachPoser, time);
+            _skeleton.basePoseInfluence = ShouldRenderGloves() ? k_GloveSkeletonBlendAmmount : k_HandSkeletonBlendAmmount;
             _lastHandState = _handState;
             _handState = EHandState.Reaching;
         }
 
         internal void BlendToPoser(SteamVR_Skeleton_Poser poser, float time = 0.1f)
         {
+            _skeleton.basePoseInfluence = 0;
             _lastHandState = _handState;
             _handState = EHandState.Holding;
             _skeleton.BlendToPoser(poser, time);
